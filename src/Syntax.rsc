@@ -3,6 +3,9 @@ module Syntax
 extend lang::std::Layout;
 extend lang::std::Id;
 
+
+//layout MyLayout = [\t\n\ \r\f]*;
+
 /*
  * Concrete syntax of QL
  */

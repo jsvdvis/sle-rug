@@ -22,7 +22,18 @@ AForm cst2ast(start[Form] sf) {
 }
 
 AQuestion cst2ast(Question q) {
-  throw "Not yet implemented";
+  switch(q) {
+    case (Question)`<Str sentence> <Id variable> : <Type answer>`: 
+      return question(toString(sentence), cst2ast((Expr)`<Id variable>`), cst2ast(answer));
+    case (Question)`<Str sentence> <Id variable> : <Type answer> = <Expr assignment>`:
+      return question(toString(sentence), cst2ast((Expr)`<Id variable>`), cst2ast(answer), cst2ast(assignment));
+    case (Question)`if (<Expr condition>) <Question then>`:
+      return question(cst2ast(condition), cst2ast(then));
+    case (Question)`if (<Expr condition>) <Question then> else <Question els>`:
+      return question(cst2ast(condition), cst2ast(then), cst2ast(els));
+    case (Question)`{ <Question+ questions> }`:
+      return question(cst2ast([q | q <- questions]));
+  }
 }
 
 AExpr cst2ast(Expr e) {
