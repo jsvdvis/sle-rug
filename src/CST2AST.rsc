@@ -38,9 +38,38 @@ AQuestion cst2ast(Question q) {
 
 AExpr cst2ast(Expr e) {
   switch (e) {
-    case (Expr)`<Id x>`: return ref("<x>", src=x@\loc);
-    
-    // etc.
+    case (Expr)`<Id x>`: 
+      return ref("<x>", src=x@\loc);
+    case (Expr)`<Num n>`:
+      return expr(toInt("<n>"));
+    case (Expr)`(<Expr e>)`:
+      return expr(cst2ast(e));
+    case (Expr)`!<Expr e>`:
+      return expr(cst2ast(e));
+    case (Expr)`<Expr lhs> * <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> / <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> + <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> - <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> \> <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> \< <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> \<= <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> \>= <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> == <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> != <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> && <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
+    case (Expr)`<Expr lhs> || <Expr rhs>`:
+      return expr(cst2ast(lhs), cst2ast(rhs));
     
     default: throw "Unhandled expression: <e>";
   }
