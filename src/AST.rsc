@@ -23,7 +23,11 @@ data AExpr(loc src = |tmp:///|)
   = ref(str name)
   | expr(num number)
   | expr(AExpr exprSingle)
-  | expr(AExpr lhs, AExpr rhs)
+  | expr(str operator, AExpr lhs, AExpr rhs)
   ;
 
-data AType(loc src = |tmp:///|);
+data AType(loc src = |tmp:///|)
+  = \type(str name)
+  ;
+  
+  

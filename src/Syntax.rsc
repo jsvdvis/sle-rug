@@ -30,7 +30,7 @@ syntax ComputedQuestion
 // and use C/Java style precedence rules (look it up on the internet)
 syntax Expr 
   = var: Id \ "true" \ "false" // true/false are reserved keywords.
-  | dec: Num
+  | dec: Int
   | bracket bra: "(" Expr ")"
   | not: "!" !>> [=] Expr
   > left(
@@ -55,18 +55,15 @@ syntax Expr
   > left or: Expr "||" Expr
   ;
   
-syntax Num
-  = [+\-]? [0-9]+ !>>[0-9];  
   
 syntax Type
-  = Str | Int | Bool;  
+  = "integer" | "boolean" | "string";  
   
 lexical Str = "\"" ![\"]* "\"";
 
 lexical Int 
-  = "integer";
+  = [+\-]? [0-9]+ !>>[0-9];
 
-lexical Bool = "boolean";
-
+lexical Bool = "true"|"false";
 
 

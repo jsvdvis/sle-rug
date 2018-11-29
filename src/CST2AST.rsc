@@ -18,63 +18,85 @@ import String;
 
 AForm cst2ast(start[Form] sf) {
   Form f = sf.top; // remove layout before and after form
-  return form("", [], src=f@\loc); 
+  return cst2ast(f, src=f@\loc);
 }
 
-AQuestion cst2ast(Question q) {
+AForm cst2ast((Form)`form <Id name> { <Question+ questions> }`) {
+  return form("<name>", [ cst2ast(q) | Question q <- questions]); 
+}
+
+AQuestion cst2ast(qs: Question q) {
   switch(q) {
     case (Question)`<Str sentence> <Id variable> : <Type answer>`: 
-      return question(toString(sentence), cst2ast((Expr)`<Id variable>`), cst2ast(answer));
+      return question("<sentence>", cst2ast((Expr)`<Id variable>`), cst2ast(answer)
+            , src = qs@\loc);
     case (Question)`<Str sentence> <Id variable> : <Type answer> = <Expr assignment>`:
-      return question(toString(sentence), cst2ast((Expr)`<Id variable>`), cst2ast(answer), cst2ast(assignment));
+      return question("<sentence>", cst2ast((Expr)`<Id variable>`), cst2ast(answer), cst2ast(assignment)
+            , src = qs@\loc);
     case (Question)`if (<Expr condition>) <Question then>`:
-      return question(cst2ast(condition), cst2ast(then));
+      return question(cst2ast(condition), cst2ast(then)
+            , src = qs@\loc);
     case (Question)`if (<Expr condition>) <Question then> else <Question els>`:
-      return question(cst2ast(condition), cst2ast(then), cst2ast(els));
+      return question(cst2ast(condition), cst2ast(then), cst2ast(els)
+            , src = qs@\loc);
     case (Question)`{ <Question+ questions> }`:
-      return question(cst2ast([q | q <- questions]));
+      return question([cst2ast(quest)| Question quest <- questions]
+            , src = qs@\loc);
   }
 }
 
-AExpr cst2ast(Expr e) {
+AExpr cst2ast(es: Expr e) {
   switch (e) {
     case (Expr)`<Id x>`: 
       return ref("<x>", src=x@\loc);
-    case (Expr)`<Num n>`:
-      return expr(toInt("<n>"));
-    case (Expr)`(<Expr e>)`:
-      return expr(cst2ast(e));
-    case (Expr)`!<Expr e>`:
-      return expr(cst2ast(e));
+    case (Expr)`<Int n>`:
+      return expr(toInt("<n>"), src = es@\loc);
+    case (Expr)`(<Expr ex>)`:
+      return expr(cst2ast(ex), src = es@\loc);
+    case (Expr)`!<Expr ex>`:
+      return expr(cst2ast(ex), src = es@\loc);   
     case (Expr)`<Expr lhs> * <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("*", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> / <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("/", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> + <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("+", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> - <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("-", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> \> <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("\>", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> \< <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("\<", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> \<= <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("\<=", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> \>= <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("\>=", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> == <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("==", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> != <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("!=", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> && <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
+      return expr("&&", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      
     case (Expr)`<Expr lhs> || <Expr rhs>`:
-      return expr(cst2ast(lhs), cst2ast(rhs));
-    
+      return expr("||", cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+    	
     default: throw "Unhandled expression: <e>";
   }
 }
 
-AType cst2ast(Type t) {
-  throw "Not yet implemented";
+AType cst2ast(ts: Type t) {
+  return \type("<t>", src = ts@\loc);
 }
+
+
