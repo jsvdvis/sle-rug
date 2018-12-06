@@ -12,7 +12,7 @@ form taxOfficeExample {
       privateDebt: integer
     "Value residue:"
       valueResidue: integer = 
-        ((sellingPrice - privateDebt) * 2)
+        ((sellingPrice - privateDebt) * -2)
   }
 
   if (privateDebt > 0) {

@@ -31,6 +31,7 @@ syntax ComputedQuestion
 syntax Expr 
   = var: Id \ "true" \ "false" // true/false are reserved keywords.
   | dec: Int
+  | \str: Str
   | bracket bra: "(" Expr ")"
   | not: "!" !>> [=] Expr
   > left(
@@ -41,13 +42,13 @@ syntax Expr
       add: Expr "+" Expr
     | sub: Expr "-" Expr
   )
-  > left (
+  > non-assoc (
       gt: Expr "\>" Expr
     | lt: Expr "\<" Expr
     | leq: Expr "\<=" Expr
     | geq: Expr "\>=" Expr
   )
-  > left (
+  > non-assoc (
       eq: Expr "==" Expr
     | neq: Expr "!=" Expr
   )

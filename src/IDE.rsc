@@ -7,6 +7,8 @@ import Resolve;
 import Check;
 import Compile;
 
+import IO;
+
 import util::IDE;
 import Message;
 import ParseTree;
