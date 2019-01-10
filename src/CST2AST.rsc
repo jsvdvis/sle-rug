@@ -30,7 +30,7 @@ AQuestion cst2ast(qs: Question q) {
   switch(q) {
     case (Question)`<Str sentence> <Id name> : <Type t>`: 
       return question("<sentence>", "<name>", cst2ast(t)
-            , src = qs@\loc);
+            , src = q.name@\loc);
     case (Question)`<Str sentence> <Id name> : <Type t> = <Expr v>`:
       return computedQuestion("<sentence>",  "<name>", cst2ast(t), cst2ast(v)
             , src = qs@\loc);

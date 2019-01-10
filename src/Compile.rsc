@@ -3,7 +3,7 @@ module Compile
 import AST;
 import Resolve;
 import IO;
-import lang::html5::DOM; // see standard library
+import HTML5DOM; // see standard library
 
 
 /*
@@ -19,13 +19,175 @@ import lang::html5::DOM; // see standard library
  * - if needed, use the name analysis to link uses to definitions
  */
 
+// Extra required attributes
+HTML5Attr v_if(value val) = html5attr("v-if", val);
+HTML5Attr v_for(value val) = html5attr("v-for", val);
+HTML5Attr v_else_if(value val) = html5attr("v-else-if", val);
+HTML5Attr v_else() = html5attr("v-else", "");
+HTML5Attr v_model(value val) = html5attr("v-model", val);
+
+
+HTML5Attr v_bind_for(value val) = html5attr(":for", val);
+HTML5Attr v_bind_key(value val) = html5attr(":key", val);
+HTML5Attr v_bind_id(value val) = html5attr(":id", val);
+HTML5Attr v_bind_name(value val) = html5attr(":name", val);
+
+
+
 void compile(AForm f) {
   writeFile(f.src[extension="js"].top, form2js(f));
   writeFile(f.src[extension="html"].top, toString(form2html(f)));
 }
 
+
 HTML5Node form2html(AForm f) {
-  return html();
+  return 
+  html(
+  	head(
+  	  meta(
+  		charset("UTF-8")
+  	  ),
+  	  script(
+  	    \type("text/javascript"),
+  		src("https://cdn.jsdelivr.net/npm/vue/dist/vue.js")
+  	  ),
+  	  title(
+  		f.name
+  	  )
+    ),
+    body(
+      div(
+        id("app"),
+        form(
+          template(
+            v_for("(q, id) in questions"),
+            div(
+              v_if("$root[\'_condition_\'+q.name] == true"),
+              v_bind_key("id"),
+              p("{{ q.sentence }}"),
+              
+              div(
+                v_if("q.computed"),
+                div(
+                  v_if("q.type==\'boolean\'"),
+                  input(
+                    \type("radio"),
+                    v_bind_id("\'boolTrue_\' + id"),
+                    v_bind_name("\'boolQuestion_\' + id"),
+                    \value("true"),
+                    v_model("$root[\'_computed_\' + q.name]"),
+                    disabled("true")
+                  ),
+                  label(
+                    v_bind_for("\'boolTrue_\' + id"),
+                    "Yes"
+                  ),
+                  input(
+                    \type("radio"),
+                    v_bind_id("\'boolFalse_\' + id"),
+                    v_bind_name("\'boolQuestion_\' + id"),
+                    \value("false"),
+                    v_model("$root[\'_computed_\' + q.name]"),
+                    disabled("true")
+                  ),
+                  label(
+                    v_bind_for("\'boolFalse_\' + id"),
+                    "No"
+                  )
+                ),
+                div(
+                  v_else_if("q.type==\'integer\'"),
+                  label(
+                    v_bind_for("\'number_\' + id"),
+                    "Number: "
+                  ),
+                  input(
+                    \type("number"),
+                    v_bind_id("\'number_\' + id"),
+					v_model("$root[\'_computed_\' + q.name]"),
+					disabled("true")
+                  )
+                ),
+                div(
+                  v_else(),
+                  label(
+                    v_bind_for("\'string_\' + id"),
+                    "String: "
+                  ),
+                  input(
+                    \type("text"),
+					v_bind_id("\'string_\' + id"),
+					v_model("$root[\'_computed_\' + q.name]"),
+					disabled("true")
+                  )
+                ) 
+              ),
+              
+              div(
+                v_else(),
+                div(
+                  v_if("q.type==\'boolean\'"),
+                  input(
+                    \type("radio"),
+                    v_bind_id("\'boolTrue_\' + id"),
+                    v_bind_name("\'boolQuestion_\' + id"),
+                    \value("true"),
+                    v_model("env[q.name]")
+                  ),
+                  label(
+                    v_bind_for("\'boolTrue_\' + id"),
+                    "Yes"
+                  ),
+                  input(
+                    \type("radio"),
+                    v_bind_id("\'boolFalse_\' + id"),
+                    v_bind_name("\'boolQuestion_\' + id"),
+                    \value("false"),
+                    v_model("env[q.name]")
+                  ),
+                  label(
+                    v_bind_for("\'boolFalse_\' + id"),
+                    "No"
+                  )
+                ),
+                div(
+                  v_else_if("q.type==\'integer\'"),
+                  label(
+                    v_bind_for("\'number_\' + id"),
+                    "Number: "
+                  ),
+                  input(
+                    \type("number"),
+                    v_bind_id("\'number_\' + id"),
+					v_model("env[q.name]")
+                  )
+                ),
+                div(
+                  v_else(),
+                  label(
+                    v_bind_for("\'string_\' + id"),
+                    "String: "
+                  ),
+                  input(
+                    \type("text"),
+					v_bind_id("\'string_\' + id"),
+					v_model("env[q.name]")
+                  )
+                )                
+              )
+            )
+          ),
+          button(
+            \type("button"),
+            "Submit"
+          )
+        )
+      ),
+      script(
+      	src(f.src.file[0..-4] + "js")
+      )
+    )		
+  );
 }
 
 str form2js(AForm f) {
