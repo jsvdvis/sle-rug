@@ -19,37 +19,37 @@ alias TEnv = rel[loc def, str name, str label, Type \type];
 // To avoid recursively traversing the form, use the `visit` construct
 // or deep match (e.g., `for (/question(...) := f) {...}` ) 
 TEnv collect(AForm f) {
-  return { <q.src, q.variable, q.sentence, typeCast(q.\type)> | /AQuestion q:= f, (q is question || q is computedQuestion)  };
+  return { <q.src, q.name, q.sentence, typeCast(q.\type)> | /AQuestion q:= f, (q is question || q is computedQuestion)  };
 }
 
 Type typeCast(AType t) {
-  switch (t.name) {
-    case "integer":
-      return tint();
-    case "boolean":
-      return tbool();
-    case "string":
-      return tstr();
-    default:
-      return tunknown();  
+  switch (t) {
+    case integer(): return tint();
+    case boolean(): return tbool();
+    case string(): return tstr();
+    default: return tunknown();  
   }
 }
 
 set[Message] check(AForm f, TEnv tenv, UseDef useDef) {
-  return union({ check(q, tenv, useDef) | /AQuestion q := f, (q is question || q is computedQuestion) })
+  return union({ check(q, tenv, useDef) | /AQuestion q := f })
        + union({ check(e, tenv, useDef) | /AExpr e := f });
 }
 
 // - produce an error if there are declared questions with the same name but different types.
 // - duplicate labels should trigger a warning 
 // - the declared type computed questions should match the type of the expression.
-set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) 
-  = { error("Type error: variable is also defined with a different type.", q.src) | any(t <- types, t != typeCast(q.\type)) }
-  + { warning("Semantics: Same question defined more than once.", q.src) | size(questions) > 1 }
-  + { error("Mismatched types, the value assigned to the variable has a different type than expected.", q.src) | q is computedQuestion, typeOf(q.\value, tenv, useDef) != typeCast(q.\type) }
-         when types := [tup.\type | tup <- toList(tenv), tup.name == q.variable],
-              questions := { e | e <- toList(tenv), e<2> == q.sentence };
-
+set[Message] check(AQuestion q, TEnv tenv, UseDef useDef) { 
+  if (q is question || q is computedQuestion) {
+    types = [tup.\type | tup <- toList(tenv), tup.name == q.name];
+    questions = { e | e <- toList(tenv), e<2> == q.sentence };
+    return { error("Type error: variable is also defined with a different type.", q.src) | any(t <- types, t != typeCast(q.\type)) }
+  		 + { warning("Semantics: Same question defined more than once.", q.src) | size(questions) > 1 }
+  		 + { error("Mismatched types, the value assigned to the variable has a different type than expected.", q.src) | q is computedQuestion, typeOf(q.\value, tenv, useDef) != typeCast(q.\type) };
+  } else if (q has condition) 
+  	return { error("An if-conditional should evaluate to a boolean.", q.src) | typeOf(q.condition, tenv, useDef) != tbool() };
+  return {};
+}
 
 // Check operand compatibility with operators.
 // E.g. for an addition node add(lhs, rhs), 
@@ -101,6 +101,7 @@ Type typeOf(AExpr e, TEnv tenv, UseDef useDef) {
       }
     case dec(_): return tint();
     case chr(_): return tstr();
+    case boo(_): return tbool();
     case not(_): return tbool();
     case mul(_,_): return tint();
     case div(_,_): return tint();

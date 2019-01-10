@@ -5,6 +5,7 @@ import AST;
 
 import ParseTree;
 import String;
+import Boolean;
 
 /*
  * Implement a mapping from concrete syntax trees (CSTs) to abstract syntax trees (ASTs)
@@ -21,17 +22,17 @@ AForm cst2ast(start[Form] sf) {
   return cst2ast(f);
 }
 
-AForm cst2ast((Form)`form <Id name> { <Question+ questions> }`) {
-  return form("<name>", [ cst2ast(q) | Question q <- questions]); 
+AForm cst2ast(fs: (Form)`form <Id name> { <Question+ questions> }`) {
+  return form("<name>", [ cst2ast(q) | Question q <- questions], src = fs@\loc); 
 }
 
 AQuestion cst2ast(qs: Question q) {
   switch(q) {
-    case (Question)`<Str sentence> <Id variable> : <Type t>`: 
-      return question("<sentence>", "<variable>", cst2ast(t)
+    case (Question)`<Str sentence> <Id name> : <Type t>`: 
+      return question("<sentence>", "<name>", cst2ast(t)
             , src = qs@\loc);
-    case (Question)`<Str sentence> <Id variable> : <Type t> = <Expr v>`:
-      return computedQuestion("<sentence>",  "<variable>", cst2ast(t), cst2ast(v)
+    case (Question)`<Str sentence> <Id name> : <Type t> = <Expr v>`:
+      return computedQuestion("<sentence>",  "<name>", cst2ast(t), cst2ast(v)
             , src = qs@\loc);
     case (Question)`if (<Expr condition>) <Question then>`:
       return ifThen(cst2ast(condition), cst2ast(then)
@@ -53,6 +54,8 @@ AExpr cst2ast(es: Expr e) {
       return dec(toInt("<n>"), src = es@\loc);
     case (Expr)`<Str s>`:
       return chr("<s>", src = es@\loc);
+    case (Expr)`<Bool b>`:
+      return boo(fromString("<b>"), src = es@\loc);
     case (Expr)`(<Expr ex>)`:
       return cst2ast(ex);
     case (Expr)`!<Expr ex>`:
@@ -82,7 +85,7 @@ AExpr cst2ast(es: Expr e) {
       return geq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
       
     case (Expr)`<Expr lhs> == <Expr rhs>`:
-      return eq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
+      return AExpr::eq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
       
     case (Expr)`<Expr lhs> != <Expr rhs>`:
       return neq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
@@ -98,7 +101,12 @@ AExpr cst2ast(es: Expr e) {
 }
 
 AType cst2ast(ts: Type t) {
-  return \type("<t>", src = ts@\loc);
+  switch ("<t>") {
+    case "integer": return integer(src = ts@\loc);
+    case "boolean": return boolean(src = ts@\loc);
+    case "string": return string(src = ts@\loc);
+    default: return unknown(src = ts@\loc);
+  }
 }
 
 

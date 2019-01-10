@@ -32,6 +32,7 @@ syntax Expr
   = var: Id \ "true" \ "false" // true/false are reserved keywords.
   | dec: Int
   | \str: Str
+  | boo: Bool
   | bracket bra: "(" Expr ")"
   | not: "!" !>> [=] Expr
   > left(

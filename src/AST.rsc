@@ -12,8 +12,8 @@ data AForm(loc src = |tmp:///|)
   ; 
 
 data AQuestion(loc src = |tmp:///|)
-  = question(str sentence, str variable, AType \type)
-  | computedQuestion(str sentence, str variable, AType \type, AExpr \value)
+  = question(str sentence, str name, AType \type)
+  | computedQuestion(str sentence, str name, AType \type, AExpr \value)
   | ifThen(AExpr condition, AQuestion then)
   | ifThenElse(AExpr condition, AQuestion then, AQuestion \else)
   | block(list[AQuestion] questions)
@@ -21,8 +21,9 @@ data AQuestion(loc src = |tmp:///|)
 
 data AExpr(loc src = |tmp:///|)
   = ref(str name)
-  | dec(num number)
+  | dec(int number)
   | chr(str string)
+  | boo(bool boolean)
   | not(AExpr e)
   | mul(AExpr lhs, AExpr rhs)
   | div(AExpr lhs, AExpr rhs)
@@ -39,7 +40,10 @@ data AExpr(loc src = |tmp:///|)
   ;
 
 data AType(loc src = |tmp:///|)
-  = \type(str name)
+  = integer()
+  | boolean()
+  | string()
+  | unknown()
   ;
   
   
