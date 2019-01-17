@@ -97,10 +97,6 @@ HTML5Node form2html(AForm f) {
                 ),
                 div(
                   v_else_if("q.type==\'integer\'"),
-                  label(
-                    v_bind_for("\'number_\' + id"),
-                    "Number: "
-                  ),
                   input(
                     \type("number"),
                     v_bind_id("\'number_\' + id"),
@@ -110,10 +106,6 @@ HTML5Node form2html(AForm f) {
                 ),
                 div(
                   v_else(),
-                  label(
-                    v_bind_for("\'string_\' + id"),
-                    "String: "
-                  ),
                   input(
                     \type("text"),
 					v_bind_id("\'string_\' + id"),
@@ -152,10 +144,6 @@ HTML5Node form2html(AForm f) {
                 ),
                 div(
                   v_else_if("q.type==\'integer\'"),
-                  label(
-                    v_bind_for("\'number_\' + id"),
-                    "Number: "
-                  ),
                   input(
                     \type("number"),
                     v_bind_id("\'number_\' + id"),
@@ -164,10 +152,6 @@ HTML5Node form2html(AForm f) {
                 ),
                 div(
                   v_else(),
-                  label(
-                    v_bind_for("\'string_\' + id"),
-                    "String: "
-                  ),
                   input(
                     \type("text"),
 					v_bind_id("\'string_\' + id"),
@@ -271,14 +255,18 @@ str formGetConditionals(AForm f) {
 
 str questionGetConditionals(AQuestion q, str conditionals, AForm f) {
   switch(q) {
-    case ifThen(condition, then): return questionGetConditionals(then, addCondition(conditionals, expression2js(condition, f)), f);
-    case ifThenElse(condition, then, \else): return questionGetConditionals(then, addCondition(conditionals, expression2js(condition, f)), f)
-                                                  + questionGetConditionals(\else, addCondition(conditionals, "this.not(" + expression2js(condition, f) + ")"), f);
-    case block(questions): return ( "" | it + questionGetConditionals(qq, conditionals, f) | qq <- questions );
-    default: return "_condition_<q.name>() {
-                          '  return <if (conditionals == "") {>true<} else {><conditionals><}>;
-                          '},
-                          '";                         
+    case ifThen(condition, then): 
+      return questionGetConditionals(then, addCondition(conditionals, expression2js(condition, f)), f);
+    case ifThenElse(condition, then, \else): 
+      return questionGetConditionals(then, addCondition(conditionals, expression2js(condition, f)), f)
+           + questionGetConditionals(\else, addCondition(conditionals, "this.not(" + expression2js(condition, f) + ")"), f);
+    case block(questions): 
+      return ( "" | it + questionGetConditionals(qq, conditionals, f) | qq <- questions );
+    default: 
+      return "_condition_<q.name>() {
+             '  return <if (conditionals == "") {>true<} else {><conditionals><}>;
+             '},
+             '";                         
   }
 }
 

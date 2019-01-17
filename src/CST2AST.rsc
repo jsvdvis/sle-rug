@@ -29,20 +29,15 @@ AForm cst2ast(fs: (Form)`form <Id name> { <Question+ questions> }`) {
 AQuestion cst2ast(qs: Question q) {
   switch(q) {
     case (Question)`<Str sentence> <Id name> : <Type t>`: 
-      return question("<sentence>", "<name>", cst2ast(t)
-            , src = name@\loc);
+      return question("<sentence>", "<name>", cst2ast(t), src = qs@\loc, labelsrc = sentence@\loc, namesrc = name@\loc);
     case (Question)`<Str sentence> <Id name> : <Type t> = <Expr v>`:
-      return computedQuestion("<sentence>",  "<name>", cst2ast(t), cst2ast(v)
-            , src = qs@\loc);
+      return computedQuestion("<sentence>",  "<name>", cst2ast(t), cst2ast(v), src = qs@\loc, labelsrc = sentence@\loc, namesrc = name@\loc);
     case (Question)`if (<Expr condition>) <Question then>`:
-      return ifThen(cst2ast(condition), cst2ast(then)
-            , src = qs@\loc);
+      return ifThen(cst2ast(condition), cst2ast(then), src = qs@\loc);
     case (Question)`if (<Expr condition>) <Question then> else <Question els>`:
-      return ifThenElse(cst2ast(condition), cst2ast(then), cst2ast(els)
-            , src = qs@\loc);
+      return ifThenElse(cst2ast(condition), cst2ast(then), cst2ast(els), src = qs@\loc);
     case (Question)`{ <Question+ questions> }`:
-      return block([cst2ast(quest)| Question quest <- questions]
-            , src = qs@\loc);
+      return block([cst2ast(quest)| Question quest <- questions], src = qs@\loc);
   }
 }
 
@@ -62,40 +57,28 @@ AExpr cst2ast(es: Expr e) {
       return not(cst2ast(ex), src = es@\loc);   
     case (Expr)`<Expr lhs> * <Expr rhs>`:
       return mul(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> / <Expr rhs>`:
       return div(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> + <Expr rhs>`:
       return add(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> - <Expr rhs>`:
       return sub(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> \> <Expr rhs>`:
       return gt(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> \< <Expr rhs>`:
       return lt(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> \<= <Expr rhs>`:
       return leq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> \>= <Expr rhs>`:
       return geq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
     case (Expr)`<Expr lhs> == <Expr rhs>`:
-      return AExpr::eq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
+      return AExpr::eq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);      
     case (Expr)`<Expr lhs> != <Expr rhs>`:
-      return neq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
+      return neq(cst2ast(lhs), cst2ast(rhs), src = es@\loc);      
     case (Expr)`<Expr lhs> && <Expr rhs>`:
-      return and(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-      
+      return and(cst2ast(lhs), cst2ast(rhs), src = es@\loc);      
     case (Expr)`<Expr lhs> || <Expr rhs>`:
-      return or(cst2ast(lhs), cst2ast(rhs), src = es@\loc);
-    	
+      return or(cst2ast(lhs), cst2ast(rhs), src = es@\loc);    	
     default: throw "Unhandled expression: <e>";
   }
 }

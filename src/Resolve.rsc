@@ -24,5 +24,5 @@ Use uses(AForm f) {
 }
 
 Def defs(AForm f) {
-  return { <q.name, q.src> | /AQuestion q := f, (q is question || q is computedQuestion) };  
+  return { <q.name, q.namesrc> | /AQuestion q := f, (q is question || q is computedQuestion) };  
 }

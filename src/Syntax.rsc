@@ -4,7 +4,6 @@ extend lang::std::Layout;
 extend lang::std::Id;
 
 
-//layout MyLayout = [\t\n\ \r\f]*;
 
 /*
  * Concrete syntax of QL
@@ -13,7 +12,7 @@ extend lang::std::Id;
 start syntax Form 
   = "form" Id "{" Question* "}"; 
 
-// TODO: question, computed question, block, if-then-else, if-then
+
 syntax Question
   = Str Id ":" Type !>> "="
   | ComputedQuestion
@@ -25,9 +24,7 @@ syntax Question
 syntax ComputedQuestion
   = Str Id ":" Type "=" Expr;
 
-// TODO: +, -, *, /, &&, ||, !, >, <, <=, >=, ==, !=, literals (bool, int, str)
-// Think about disambiguation using priorities and associativity
-// and use C/Java style precedence rules (look it up on the internet)
+
 syntax Expr 
   = var: Id \ "true" \ "false" // true/false are reserved keywords.
   | dec: Int

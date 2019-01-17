@@ -56,14 +56,21 @@ VEnv evalOnce(AForm f, Input inp, VEnv venv) {
 }
 
 VEnv eval(AQuestion q, Input inp, VEnv venv) {
-  // evaluate conditions for branching,
-  // evaluate inp and computed questions to return updated VEnv
   switch(q) {
-  	case question(_, name,_): if (name == inp.question) venv[inp.question] = inp.\value;
-  	case computedQuestion(_, name,_, \value): venv[name] = eval(\value, venv);
-  	case ifThen(condition, then): if (eval(condition, venv) == vbool(true)) venv = eval(then, inp, venv);
-  	case ifThenElse(condition, then, \else): if (eval(condition, venv) == vbool(true)) venv = eval(then, inp, venv); else venv = eval(\else, inp, venv);
-  	case block(questions): return ( venv | eval(aq, inp, it) | AQuestion aq <- questions );
+  	case question(_, name,_): 
+  	  if (name == inp.question) venv[inp.question] = inp.\value;
+  	case computedQuestion(_, name,_, \value): 
+  	  venv[name] = eval(\value, venv);
+  	case ifThen(condition, then): 
+  	  if (eval(condition, venv) == vbool(true)) 
+  	    venv = eval(then, inp, venv);
+  	case ifThenElse(condition, then, \else): 
+  	  if (eval(condition, venv) == vbool(true)) 
+  	    venv = eval(then, inp, venv); 
+  	  else 
+  	    venv = eval(\else, inp, venv);
+  	case block(questions): 
+  	  return ( venv | eval(aq, inp, it) | AQuestion aq <- questions );
   }
   return venv; 
 }
@@ -72,7 +79,7 @@ Value eval(AExpr e, VEnv venv) {
   switch (e) {
     case ref(str x): return venv[x];
     case dec(int n): return vint(n);
-    case chr(str s): return vstr(s);
+    case chr(str s): return vstr(s[1..-1]); // This is to remove \" \" from strings, makes the interpreter more user-friendly
     case boo(bool b): return vbool(b);
     case not(AExpr a): return (eval(a, venv).b ? vbool(false) : vbool(true));
     case mul(AExpr lhs, AExpr rhs): return vint(eval(lhs, venv).n * eval(rhs, venv).n);

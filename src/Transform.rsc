@@ -4,6 +4,7 @@ extend lang::std::Id;
 
 import Syntax;
 import AST;
+import CST2AST;
 import Resolve;
 import Set;
 
@@ -13,18 +14,7 @@ import Set;
  */
  
  
-/* Normalization:
- *  wrt to the semantics of QL the following
- *     q0: "" int; if (a) { if (b) { q1: "" int; } q2: "" int; }
- *
- *  is equivalent to
- *     if (true) q0: "" int;
- *     if (a && b) q1: "" int;
- *     if (a) q2: "" int;
- *
- * Write a transformation that performs this flattening transformation.
- *
- */
+/* Normalization */
  
 AForm flatten(AForm f) {
   list[AQuestion] questions = flattenQuestions(f.questions);
@@ -67,28 +57,35 @@ list[AQuestion] flattenQuestions(list[AQuestion] questions, AExpr currentConditi
 }
 
 
-/* Rename refactoring:
- *
- * Write a refactoring transformation that consistently renames all occurrences of the same name.
- * Use the results of name resolution to find the equivalence class of a name.
- *
- */
+/* Rename refactoring */
  
  Form rename(Form f, loc useOrDef, str newName, UseDef useDef) { 
-   list[loc] usad = findUsagesAndDeclaration(useOrDef, useDef);
-   return visit(f) {
-     case Id x => [Id]newName when (x@\loc) in usad
-   } 
+   set[loc] occurrences = findOccurrences(useOrDef, useDef);
+   if (isUnused(f, newName)) {
+     return visit(f) {
+       case Id x => tryRename(x, newName) when (x@\loc) in occurrences
+     } 
+   }
+   return f;
  } 
  
  
- list[loc] findUsagesAndDeclaration(loc useOrDef, UseDef useDef) {
+ set[loc] findOccurrences(loc useOrDef, UseDef useDef) {
    loc definition = getOneFrom({ l | <useOrDef, loc l> <- useDef } + { useOrDef | <loc l, useOrDef> <- useDef });
    set[loc] usages = { l | <loc l, definition> <- useDef };
    
-   return toList(usages + { definition });
+   return usages + { definition };
+ }
+
+ 
+ Id tryRename(Id current, str id) { 
+ 	try return parse(#Id, id); 
+ 	  catch: return current; 
  }
  
+ bool isUnused(Form f, str newName) {
+ 	AForm af = cst2ast(f);
+	return isEmpty({ newName | <newName, _> <- defs(af) });
+ }
  
- list[loc] occurrences(UseDef useDef) = [useDef.use] + [useDef.def];
 
