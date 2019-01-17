@@ -1,6 +1,7 @@
 module Resolve
 
 import AST;
+import IO;
 
 /*
  * Name resolution for QL
@@ -18,10 +19,10 @@ alias UseDef = rel[loc use, loc def];
 
 UseDef resolve(AForm f) = uses(f) o defs(f);
 
-Use uses(AForm f) {
-  return {}; 
+Use uses(AForm f) { 
+  return { <e.src, e.name> | /AExpr e := f, e is ref };  
 }
 
 Def defs(AForm f) {
-  return {}; 
+  return { <q.name, q.namesrc> | /AQuestion q := f, (q is question || q is computedQuestion) };  
 }
